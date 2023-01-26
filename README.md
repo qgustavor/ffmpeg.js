@@ -13,6 +13,7 @@ Currently available builds (additional builds may be added in future):
 * `ffmpeg-worker-mp4.js` - Web Worker version of `ffmpeg-mp4.js`.
 * `ffmpeg-worker-hls.js` - HLS (HTTP Live Streaming) in a Web Worker. Data is MPEG2-TS encoded and POSTed via HTTP. Note this uses Web Assembly.
 * `ffmpeg-worker-dash.js` - DASH (Dynamic Adaptive Streaming over HTTP) in a Web Worker. Data is POSTed via HTTP. Note this uses Web Assembly.
+* `ffmpeg-worker-mkve.js` - Build for mkv-extract without any encoders nor decoders, just muxing. Note this uses Web Assembly.
 
 Note: only NPM releases contain abovementioned files.
 
@@ -252,3 +253,7 @@ Included libraries:
 * LAME [licensed under LGPL](https://github.com/rbrito/lame/blob/origin/COPYING).
 
 See [LICENSE.MP4](https://github.com/Kagami/ffmpeg.js/blob/master/LICENSE.MP4) for the full text of software licenses used in this build.
+
+### MKV Extract build
+
+This build uses the LGPL version of FFmpeg and are thus available under LGPL 2.1 or later. See [here](https://www.ffmpeg.org/legal.html) for more details and FFmpeg's license information.

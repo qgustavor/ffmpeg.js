@@ -6,7 +6,7 @@ PRE_JS = build/pre.js
 POST_JS_SYNC = build/post-sync.js
 POST_JS_WORKER = build/post-worker.js
 
-# Components common to webm and mp4, not for hls and dash
+# Components common to webm and mp4, not for hls, dash and mkvextract
 COMMON_FILTERS = aresample scale crop overlay hstack vstack
 COMMON_DEMUXERS = matroska ogg mov mp3 wav image2 concat
 COMMON_DECODERS = vp8 h264 vorbis opus mp3 aac pcm_s16le mjpeg png
@@ -49,16 +49,28 @@ DASH_FILTERS =
 DASH_PARSERS = vp9 opus
 FFMPEG_DASH_BC = build/ffmpeg-dash/ffmpeg.bc
 
-all: webm mp4 hls dash
+# Reuse DASH infrastructure
+LIBRARY_MKVE_JS = build/library-dash.js
+MKVE_DEMUXERS = matroska mov
+MKVE_MUXERS = matroska mp4 srt ass flac mp3 null
+MKVE_DECODERS =
+MKVE_ENCODERS =
+MKVE_FILTERS =
+MKVE_PARSERS =
+FFMPEG_MKVE_BC = build/ffmpeg-dash/ffmpeg.bc
+
+all: webm mp4 hls dash mkve
 webm: ffmpeg-webm.js ffmpeg-worker-webm.js
 mp4: ffmpeg-mp4.js ffmpeg-worker-mp4.js
 hls: ffmpeg-worker-hls.js ffmpeg-worker-hls.wasm
 dash: ffmpeg-worker-dash.js ffmpeg-worker-dash.wasm
+mkve: ffmpeg-worker-mkve.js ffmpeg-worker-mkve.wasm
 
 clean: clean-js clean-wasm \
 	clean-opus clean-libvpx clean-ffmpeg-webm \
 	clean-lame clean-x264 clean-ffmpeg-mp4 \
-	clean-ffmpeg-hls clean-ffmpeg-dash
+	clean-ffmpeg-hls clean-ffmpeg-dash \
+	clean-ffmpeg-mkve
 clean-js:
 	rm -f ffmpeg*.js
 clean-wasm:
@@ -79,6 +91,8 @@ clean-ffmpeg-hls:
 	cd build/ffmpeg-hls && git clean -xdf
 clean-ffmpeg-dash:
 	cd build/ffmpeg-dash && git clean -xdf
+clean-ffmpeg-mkve:
+	cd build/ffmpeg-mkve && git clean -xdf
 
 build/opus/configure:
 	cd build/opus && ./autogen.sh
@@ -291,6 +305,28 @@ build/ffmpeg-dash/ffmpeg.bc:
 		&& \
 	emmake make -j EXESUF=.bc
 
+build/ffmpeg-mkve/ffmpeg.bc:
+	cd build/ffmpeg-mkve && \
+	git reset --hard && \
+	patch -p1 < ../ffmpeg-async-io.patch && \
+	patch -p1 < ../ffmpeg-mkve-configure.patch && \
+	patch -p1 < ../ffmpeg-mkve-codecs.patch && \
+	patch -p1 < ../ffmpeg-async-exit.patch && \
+	emconfigure ./configure \
+		$(FFMPEG_COMMON_CORE_ARGS) \
+		$(addprefix --enable-demuxer=,$(MKVE_DEMUXERS)) \
+		$(addprefix --enable-muxer=,$(MKVE_MUXERS)) \
+		$(addprefix --enable-decoder=,$(MKVE_DECODERS)) \
+		$(addprefix --enable-encoder=,$(MKVE_ENCODERS)) \
+		$(addprefix --enable-bsf=,$(MKVE_BSFS)) \
+		$(addprefix --enable-filter=,$(MKVE_FILTERS)) \
+		$(addprefix --enable-parser=,$(MKVE_PARSERS)) \
+		--disable-zlib \
+		--enable-protocol=file \
+		--extra-ldflags="-r" \
+		&& \
+	emmake make -j EXESUF=.bc
+
 EMCC_COMMON_CORE_ARGS = \
 	-O3 \
 	--closure 1 \
@@ -342,6 +378,16 @@ ffmpeg-worker-dash.js ffmpeg-worker-dash.wasm: $(FFMPEG_DASH_BC) $(PRE_JS) $(POS
 		--post-js $(POST_JS_WORKER) \
 		$(EMCC_COMMON_CORE_ARGS) \
 		--js-library $(LIBRARY_DASH_JS) \
+		-s WASM=1 \
+		-s ASYNCIFY \
+	        -s 'ASYNCIFY_IMPORTS=["emscripten_read_async", "emscripten_close_async", "emscripten_exit_async"]'
+
+ffmpeg-worker-mkve.js ffmpeg-worker-mkve.wasm: $(FFMPEG_MKVE_BC) $(PRE_JS) $(POST_JS_WORKER) $(LIBRARY_MKVE_JS)
+	emcc $(FFMPEG_MKVE_BC) \
+		--post-js $(POST_JS_WORKER) \
+		$(EMCC_COMMON_CORE_ARGS) \
+		--js-library $(LIBRARY_MKVE_JS) \
+		-lworkerfs.js \
 		-s WASM=1 \
 		-s ASYNCIFY \
 	        -s 'ASYNCIFY_IMPORTS=["emscripten_read_async", "emscripten_close_async", "emscripten_exit_async"]'
