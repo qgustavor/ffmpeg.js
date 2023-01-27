@@ -30,3 +30,6 @@
 	path = build/ffmpeg-dash
 	url = https://git.ffmpeg.org/ffmpeg.git
 	ignore = dirty
+[submodule "build/ffmpeg-mkve"]
+	path = build/ffmpeg-mkve
+	url = https://git.ffmpeg.org/ffmpeg.git

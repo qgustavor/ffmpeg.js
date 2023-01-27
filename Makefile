@@ -49,22 +49,21 @@ DASH_FILTERS =
 DASH_PARSERS = vp9 opus
 FFMPEG_DASH_BC = build/ffmpeg-dash/ffmpeg.bc
 
-# Reuse DASH infrastructure
-LIBRARY_MKVE_JS = build/library-dash.js
 MKVE_DEMUXERS = matroska mov
 MKVE_MUXERS = matroska mp4 srt ass flac mp3 null
 MKVE_DECODERS =
 MKVE_ENCODERS =
 MKVE_FILTERS =
 MKVE_PARSERS =
-FFMPEG_MKVE_BC = build/ffmpeg-dash/ffmpeg.bc
+FFMPEG_MKVE_BC = build/ffmpeg-mkve/ffmpeg.bc
+FFMPEG_MKVE_FFPROBE_BC = build/ffmpeg-mkve/ffprobe.bc
 
 all: webm mp4 hls dash mkve
 webm: ffmpeg-webm.js ffmpeg-worker-webm.js
 mp4: ffmpeg-mp4.js ffmpeg-worker-mp4.js
 hls: ffmpeg-worker-hls.js ffmpeg-worker-hls.wasm
 dash: ffmpeg-worker-dash.js ffmpeg-worker-dash.wasm
-mkve: ffmpeg-worker-mkve.js ffmpeg-worker-mkve.wasm
+mkve: ffmpeg-worker-mkve.js ffmpeg-worker-mkve.wasm ffprobe-worker-mkve.js ffprobe-worker-mkve.wasm
 
 clean: clean-js clean-wasm \
 	clean-opus clean-libvpx clean-ffmpeg-webm \
@@ -308,10 +307,6 @@ build/ffmpeg-dash/ffmpeg.bc:
 build/ffmpeg-mkve/ffmpeg.bc:
 	cd build/ffmpeg-mkve && \
 	git reset --hard && \
-	patch -p1 < ../ffmpeg-async-io.patch && \
-	patch -p1 < ../ffmpeg-mkve-configure.patch && \
-	patch -p1 < ../ffmpeg-mkve-codecs.patch && \
-	patch -p1 < ../ffmpeg-async-exit.patch && \
 	emconfigure ./configure \
 		$(FFMPEG_COMMON_CORE_ARGS) \
 		$(addprefix --enable-demuxer=,$(MKVE_DEMUXERS)) \
@@ -321,6 +316,7 @@ build/ffmpeg-mkve/ffmpeg.bc:
 		$(addprefix --enable-bsf=,$(MKVE_BSFS)) \
 		$(addprefix --enable-filter=,$(MKVE_FILTERS)) \
 		$(addprefix --enable-parser=,$(MKVE_PARSERS)) \
+		--enable-ffprobe \
 		--disable-zlib \
 		--enable-protocol=file \
 		--extra-ldflags="-r" \
@@ -382,12 +378,18 @@ ffmpeg-worker-dash.js ffmpeg-worker-dash.wasm: $(FFMPEG_DASH_BC) $(PRE_JS) $(POS
 		-s ASYNCIFY \
 	        -s 'ASYNCIFY_IMPORTS=["emscripten_read_async", "emscripten_close_async", "emscripten_exit_async"]'
 
-ffmpeg-worker-mkve.js ffmpeg-worker-mkve.wasm: $(FFMPEG_MKVE_BC) $(PRE_JS) $(POST_JS_WORKER) $(LIBRARY_MKVE_JS)
+ffmpeg-worker-mkve.js ffmpeg-worker-mkve.wasm: $(FFMPEG_MKVE_BC) $(PRE_JS) $(POST_JS_WORKER)
 	emcc $(FFMPEG_MKVE_BC) \
 		--post-js $(POST_JS_WORKER) \
 		$(EMCC_COMMON_CORE_ARGS) \
-		--js-library $(LIBRARY_MKVE_JS) \
 		-lworkerfs.js \
-		-s WASM=1 \
-		-s ASYNCIFY \
-	        -s 'ASYNCIFY_IMPORTS=["emscripten_read_async", "emscripten_close_async", "emscripten_exit_async"]'
+		-lidbfs.js \
+		-s WASM=1
+
+ffprobe-worker-mkve.js ffprobe-worker-mkve.wasm: $(FFMPEG_MKVE_BC) $(PRE_JS) $(POST_JS_WORKER)
+	emcc $(FFMPEG_MKVE_FFPROBE_BC) \
+		--post-js $(POST_JS_WORKER) \
+		$(EMCC_COMMON_CORE_ARGS) \
+		-lworkerfs.js \
+		-lidbfs.js \
+		-s WASM=1
