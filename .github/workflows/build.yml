@@ -1,0 +1,62 @@
+name: Build and Publish FFmpeg
+
+on:
+  workflow_dispatch: # Build only when triggered since it seems quite resource heavy
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Emscripten environment
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y git cmake build-essential
+        git clone https://github.com/emscripten-core/emsdk.git
+        cd emsdk
+        ./emsdk install latest
+        ./emsdk activate latest
+        source ./emsdk_env.sh
+        cd ..
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get install -y autoconf automake libtool pkg-config
+        # Ensure all the submodules are checked out
+        git submodule update --init --recursive
+
+    - name: Build FFmpeg worker and ffprobe
+      env:
+        EM_CACHE: /tmp/emscripten_cache
+      run: |
+        # Load Emscripten environment
+        source emsdk/emsdk_env.sh
+        # Build FFmpeg and ffprobe
+        make mkve
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: ffmpeg-worker-mkve.js
+        path: ffmpeg-worker-mkve.js
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: ffmpeg-worker-mkve.wasm
+        path: ffmpeg-worker-mkve.wasm
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: ffprobe-worker-mkve.js
+        path: ffprobe-worker-mkve.js
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: ffprobe-worker-mkve.wasm
+        path: ffprobe-worker-mkve.wasm
