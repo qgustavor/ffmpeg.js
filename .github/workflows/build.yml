@@ -38,25 +38,7 @@ jobs:
         make mkve
 
     - name: Upload artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
-        name: ffmpeg-worker-mkve.js
-        path: ffmpeg-worker-mkve.js
-
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v3
-      with:
-        name: ffmpeg-worker-mkve.wasm
-        path: ffmpeg-worker-mkve.wasm
-
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v3
-      with:
-        name: ffprobe-worker-mkve.js
-        path: ffprobe-worker-mkve.js
-
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v3
-      with:
-        name: ffprobe-worker-mkve.wasm
-        path: ffprobe-worker-mkve.wasm
+        name: output
+        path: {ffmpeg, ffprobe}-worker-mkve.{js,wasm}

@@ -49,7 +49,7 @@ DASH_FILTERS =
 DASH_PARSERS = vp9 opus
 FFMPEG_DASH_BC = build/ffmpeg-dash/ffmpeg.bc
 
-MKVE_DEMUXERS = matroska mov
+MKVE_DEMUXERS = matroska mov avi
 MKVE_MUXERS = matroska mp4 srt ass flac mp3 null
 MKVE_DECODERS =
 MKVE_ENCODERS =
@@ -326,7 +326,6 @@ build/ffmpeg-mkve/ffmpeg.bc:
 EMCC_COMMON_CORE_ARGS = \
 	-O3 \
 	--closure 1 \
-	--memory-init-file 0 \
 	-s WASM_ASYNC_COMPILATION=0 \
 	-s ASSERTIONS=0 \
 	-s TOTAL_MEMORY=67108864 \
