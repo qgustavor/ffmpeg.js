@@ -12,6 +12,8 @@ jobs:
       uses: actions/checkout@v4
       with:
         submodules: true
+        # https://github.com/actions/checkout/issues/176#issuecomment-597131018
+        fetch-depth: 0
 
     - name: Set up Emscripten environment
       run: |
