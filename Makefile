@@ -391,14 +391,18 @@ ffmpeg-worker-mkve.js ffmpeg-worker-mkve.wasm: $(FFMPEG_MKVE_BC) $(PRE_JS) $(POS
 	emcc $(FFMPEG_MKVE_BC) \
 		--post-js $(POST_JS_WORKER) \
 		$(EMCC_COMMON_CORE_ARGS) \
-		-lworkerfs.js \
-		-lidbfs.js \
-		-s WASM=1
+		-pthread \
+		-s PROXY_TO_PTHREAD \
+		-s WASM=1 \
+		-s ASYNCIFY \
+	        -s 'ASYNCIFY_IMPORTS=["emscripten_read_async", "emscripten_close_async", "emscripten_exit_async"]'
 
-ffprobe-worker-mkve.js ffprobe-worker-mkve.wasm: $(FFMPEG_MKVE_BC) $(PRE_JS) $(POST_JS_WORKER)
+ffprobe-worker-mkve.js ffprobe-worker-mkve.wasm: $(FFMPEG_MKVE_FFPROBE_BC) $(PRE_JS) $(POST_JS_WORKER)
 	emcc $(FFMPEG_MKVE_FFPROBE_BC) \
 		--post-js $(POST_JS_WORKER) \
 		$(EMCC_COMMON_CORE_ARGS) \
-		-lworkerfs.js \
-		-lidbfs.js \
-		-s WASM=1
+		-pthread \
+		-s PROXY_TO_PTHREAD \
+		-s WASM=1 \
+		-s ASYNCIFY \
+	        -s 'ASYNCIFY_IMPORTS=["emscripten_read_async", "emscripten_close_async", "emscripten_exit_async"]'
