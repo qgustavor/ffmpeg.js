@@ -1,35 +1,3 @@
-[submodule "build/libvpx"]
-	path = build/libvpx
-	url = https://chromium.googlesource.com/webm/libvpx
-	ignore = dirty
-[submodule "build/opus"]
-	path = build/opus
-	url = https://github.com/xiph/opus.git
-	ignore = dirty
-[submodule "build/lame"]
-	path = build/lame
-	url = https://github.com/Kagami/lame-svn.git
-	ignore = dirty
-[submodule "build/x264"]
-	path = build/x264
-	url = https://code.videolan.org/videolan/x264.git
-	ignore = dirty
-[submodule "build/ffmpeg-webm"]
-	path = build/ffmpeg-webm
-	url = https://git.ffmpeg.org/ffmpeg.git
-	ignore = dirty
-[submodule "build/ffmpeg-mp4"]
-	path = build/ffmpeg-mp4
-	url = https://git.ffmpeg.org/ffmpeg.git
-	ignore = dirty
-[submodule "build/ffmpeg-hls"]
-	path = build/ffmpeg-hls
-	url = https://git.ffmpeg.org/ffmpeg.git
-	ignore = dirty
-[submodule "build/ffmpeg-dash"]
-	path = build/ffmpeg-dash
-	url = https://git.ffmpeg.org/ffmpeg.git
-	ignore = dirty
 [submodule "build/ffmpeg-mkve"]
 	path = build/ffmpeg-mkve
 	url = https://git.ffmpeg.org/ffmpeg.git
