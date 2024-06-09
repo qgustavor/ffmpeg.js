@@ -55,8 +55,8 @@ MKVE_DECODERS =
 MKVE_ENCODERS =
 MKVE_FILTERS =
 MKVE_PARSERS =
-FFMPEG_MKVE_BC = build/ffmpeg-mkve/ffmpeg.bc
-FFMPEG_MKVE_FFPROBE_BC = build/ffmpeg-mkve/ffprobe.bc
+FFMPEG_MKVE_BC = build/ffmpeg-mkve/ffmpeg.o
+FFMPEG_MKVE_FFPROBE_BC = build/ffmpeg-mkve/ffprobe.o
 
 all: webm mp4 hls dash mkve
 webm: ffmpeg-webm.js ffmpeg-worker-webm.js
@@ -65,31 +65,11 @@ hls: ffmpeg-worker-hls.js ffmpeg-worker-hls.wasm
 dash: ffmpeg-worker-dash.js ffmpeg-worker-dash.wasm
 mkve: ffmpeg-worker-mkve.js ffmpeg-worker-mkve.wasm ffprobe-worker-mkve.js ffprobe-worker-mkve.wasm
 
-clean: clean-js clean-wasm \
-	clean-opus clean-libvpx clean-ffmpeg-webm \
-	clean-lame clean-x264 clean-ffmpeg-mp4 \
-	clean-ffmpeg-hls clean-ffmpeg-dash \
-	clean-ffmpeg-mkve
+clean: clean-js clean-wasm clean-ffmpeg-mkve
 clean-js:
 	rm -f ffmpeg*.js
 clean-wasm:
 	rm -f ffmpeg*.wasm
-clean-opus:
-	cd build/opus && git clean -xdf
-clean-libvpx:
-	cd build/libvpx && git clean -xdf
-clean-ffmpeg-webm:
-	cd build/ffmpeg-webm && git clean -xdf
-clean-lame:
-	cd build/lame && git clean -xdf
-clean-x264:
-	cd build/x264 && git clean -xdf
-clean-ffmpeg-mp4:
-	cd build/ffmpeg-mp4 && git clean -xdf
-clean-ffmpeg-hls:
-	cd build/ffmpeg-hls && git clean -xdf
-clean-ffmpeg-dash:
-	cd build/ffmpeg-dash && git clean -xdf
 clean-ffmpeg-mkve:
 	cd build/ffmpeg-mkve && git clean -xdf
 
@@ -306,9 +286,12 @@ build/ffmpeg-dash/ffmpeg.bc:
 		&& \
 	emmake make -j EXESUF=.bc
 
-build/ffmpeg-mkve/ffmpeg.bc:
+build/ffmpeg-mkve/ffmpeg.o:
 	cd build/ffmpeg-mkve && \
 	git reset --hard && \
+	patch -p1 < ../ffmpeg-async-io.patch && \
+	patch -p1 < ../ffmpeg-async-exit.patch && \
+	patch -p1 < ../ffmpeg-pthread-exit.patch && \
 	emconfigure ./configure \
 		$(FFMPEG_COMMON_CORE_ARGS) \
 		$(addprefix --enable-demuxer=,$(MKVE_DEMUXERS)) \
@@ -323,7 +306,7 @@ build/ffmpeg-mkve/ffmpeg.bc:
 		--enable-protocol=file \
 		--extra-ldflags="-r" \
 		&& \
-	emmake make -j EXESUF=.bc
+	emmake make -j EXESUF=.o
 
 EMCC_COMMON_CORE_ARGS = \
 	-O3 \
@@ -398,7 +381,7 @@ ffmpeg-worker-mkve.js ffmpeg-worker-mkve.wasm: $(FFMPEG_MKVE_BC) $(PRE_JS) $(POS
 	        -s 'ASYNCIFY_IMPORTS=["emscripten_read_async", "emscripten_close_async", "emscripten_exit_async"]'
 
 ffprobe-worker-mkve.js ffprobe-worker-mkve.wasm: $(FFMPEG_MKVE_FFPROBE_BC) $(PRE_JS) $(POST_JS_WORKER)
-	emcc $(FFMPEG_MKVE_FFPROBE_BC) \
+	emcc $(FFMPEG_MKVE_BC) \
 		--post-js $(POST_JS_WORKER) \
 		$(EMCC_COMMON_CORE_ARGS) \
 		-pthread \
