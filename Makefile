@@ -50,11 +50,7 @@ DASH_PARSERS = vp9 opus
 FFMPEG_DASH_BC = build/ffmpeg-dash/ffmpeg.bc
 
 MKVE_DEMUXERS = matroska mov avi
-MKVE_MUXERS = matroska mp4 srt ass flac mp3 null
-MKVE_DECODERS =
-MKVE_ENCODERS =
-MKVE_FILTERS =
-MKVE_PARSERS =
+MKVE_MUXERS = matroska mp4 srt ass sup webvtt dvd vob flac mp3 null
 FFMPEG_MKVE_BC = build/ffmpeg-mkve/ffmpeg.o
 FFMPEG_MKVE_FFPROBE_BC = build/ffmpeg-mkve/ffprobe.o
 
@@ -296,11 +292,9 @@ build/ffmpeg-mkve/ffmpeg.o:
 		$(FFMPEG_COMMON_CORE_ARGS) \
 		$(addprefix --enable-demuxer=,$(MKVE_DEMUXERS)) \
 		$(addprefix --enable-muxer=,$(MKVE_MUXERS)) \
-		$(addprefix --enable-decoder=,$(MKVE_DECODERS)) \
-		$(addprefix --enable-encoder=,$(MKVE_ENCODERS)) \
-		$(addprefix --enable-bsf=,$(MKVE_BSFS)) \
-		$(addprefix --enable-filter=,$(MKVE_FILTERS)) \
-		$(addprefix --enable-parser=,$(MKVE_PARSERS)) \
+		--disable-avfilter \
+		--disable-swresample \
+		--disable-swscale \
 		--enable-ffprobe \
 		--disable-zlib \
 		--enable-protocol=file \
