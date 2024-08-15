@@ -286,8 +286,6 @@ build/ffmpeg-mkve/ffmpeg.o:
 	cd build/ffmpeg-mkve && \
 	git reset --hard && \
 	patch -p1 < ../ffmpeg-async-io.patch && \
-	patch -p1 < ../ffmpeg-async-exit.patch && \
-	patch -p1 < ../ffmpeg-pthread-exit.patch && \
 	emconfigure ./configure \
 		$(FFMPEG_COMMON_CORE_ARGS) \
 		$(addprefix --enable-demuxer=,$(MKVE_DEMUXERS)) \
