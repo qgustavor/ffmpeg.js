@@ -1,3 +1,4 @@
 [submodule "build/ffmpeg-mkve"]
 	path = build/ffmpeg-mkve
 	url = https://git.ffmpeg.org/ffmpeg.git
+	branch = release/6.0
