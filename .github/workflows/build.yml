@@ -21,8 +21,8 @@ jobs:
         sudo apt-get install -y git cmake build-essential
         git clone https://github.com/emscripten-core/emsdk.git
         cd emsdk
-        ./emsdk install latest
-        ./emsdk activate latest
+        ./emsdk install 3.1.49
+        ./emsdk activate 3.1.49
         source ./emsdk_env.sh
         cd ..
 

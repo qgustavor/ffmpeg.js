@@ -194,7 +194,7 @@ It's recommended to use [Docker](https://www.docker.com/) to build ffmpeg.js.
 
 1.  Clone ffmpeg.js repository with submodules:
     ```bash
-    git clone https://github.com/Kagami/ffmpeg.js.git --recurse-submodules
+    git clone https://github.com/qgustavor/ffmpeg.js.git --recurse-submodules
     ```
 
 2.  Modify Makefile and/or patches if you wish to make a custom build.
@@ -217,12 +217,12 @@ sudo apt-get install -y git python3 build-essential automake libtool pkg-config
 
 cd ~
 git clone https://github.com/emscripten-core/emsdk.git && cd emsdk
-./emsdk install latest
-./emsdk activate latest
+./emsdk install 3.1.49
+./emsdk activate 3.1.49
 source emsdk_env.sh
 
 cd ~
-git clone https://github.com/Kagami/ffmpeg.js.git --recurse-submodules && cd ffmpeg.js
+git clone https://github.com/qgustavor/ffmpeg.js.git --recurse-submodules && cd ffmpeg.js
 make
 ```
 
